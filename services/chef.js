@@ -1,6 +1,6 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-const API_KEY = 'AIzaSyCjJTkC18-rLefSB2k23C99zoI5gONj5A8';
+const API_KEY = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const SYSTEM_PROMPT = `You are the Aurae Master Chef — a warm, knowledgeable, and patient culinary guide.
