@@ -1,0 +1,37 @@
+  <footer class="site-footer">
+    <div class="container">
+      <img src="/svg/botanical-2.svg" alt="" class="footer-botanical" aria-hidden="true">
+
+      <div class="footer-grid">
+        <div>
+          <h4>About Aurae</h4>
+          <p>A curated space for those who believe cooking is an act of care. We collect recipes that honor simplicity, seasonality, and the quiet joy of feeding the people you love.</p>
+        </div>
+        <div>
+          <h4>Explore</h4>
+          <a href="/recipes">All Recipes</a>
+          <a href="/recipes?category=breakfast">Breakfast</a>
+          <a href="/recipes?category=lunch">Lunch</a>
+          <a href="/recipes?category=dinner">Dinner</a>
+          <a href="/recipes?category=desserts">Desserts</a>
+          <a href="/recipes?category=baking">Baking</a>
+          <a href="/recipes?category=drinks">Drinks</a>
+        </div>
+        <div>
+          <h4>Community</h4>
+          <a href="/auth/register">Create an Account</a>
+          <a href="/recipes/create">Share a Recipe</a>
+          <a href="/favorites">Your Collection</a>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        &copy; <%= new Date().getFullYear() %> Aurae. Crafted with warmth.
+      </div>
+    </div>
+  </footer>
+
+  <%- include('chef-chat') %>
+  <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<%- include('../partials/head', { title: 'Share Your Recipe | Aurae' }) %>
+<%- include('../partials/header') %>
+
+<main class="create-page">
+  <section class="container container--narrow">
+    <!-- Page Header -->
+    <div class="create-page__header">
+      <span class="section-label">Contribute</span>
+      <h1>Share Your Recipe</h1>
+      <p class="create-page__subtitle">Every great recipe starts with someone willing to share it.</p>
+    </div>
+
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <ul class="form-errors">
+        <% errors.forEach(function(err) { %>
+          <li><%= err %></li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <form action="/recipes/create" method="POST" id="createRecipeForm">
+
+      <!-- Card 1: Basics + AI -->
+      <div class="create-card">
+        <div class="create-card__header">
+          <h2 class="create-card__title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            The Basics
+          </h2>
+          <p class="create-card__desc">Give your recipe a name, then let AI do the heavy lifting.</p>
+        </div>
+
+        <div class="form-group">
+          <input type="text" name="title" id="title" placeholder=" " value="<%= typeof old !== 'undefined' ? old.title || '' : '' %>" required>
+          <label for="title">Recipe Title</label>
+        </div>
+
+        <div class="ai-autofill-bar">
+          <button type="button" class="btn btn--ai" id="aiAutofillBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <span>Auto-fill with AI</span>
+          </button>
+          <span class="ai-autofill-hint">Type a recipe name, then click to auto-generate everything</span>
+        </div>
+
+        <div class="ai-loading" id="aiLoading" style="display: none;">
+          <div class="ai-loading__spinner"></div>
+          <span>AI is crafting your recipe...</span>
+        </div>
+
+        <div class="form-group">
+          <textarea name="description" id="description" placeholder=" " rows="3" required><%= typeof old !== 'undefined' ? old.description || '' : '' %></textarea>
+          <label for="description">Description</label>
+        </div>
+      </div>
+
+      <!-- Card 2: Photo -->
+      <div class="create-card">
+        <div class="create-card__header">
+          <h2 class="create-card__title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Photo
+          </h2>
+          <p class="create-card__desc">The AI will generate an image, or paste your own URL below.</p>
+        </div>
+
+        <div class="form-group">
+          <input type="text" name="image_url" id="imageUrl" placeholder=" " value="<%= typeof old !== 'undefined' ? old.image_url || '' : '' %>">
+          <label for="imageUrl">Image URL or path</label>
+        </div>
+        <div class="image-preview" id="imagePreview">
+          <img src="" alt="Preview" id="imagePreviewImg">
+          <span class="image-preview__placeholder">Image preview will appear here</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Details -->
+      <div class="create-card">
+        <div class="create-card__header">
+          <h2 class="create-card__title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Details
+          </h2>
+          <p class="create-card__desc">Category, timing, and difficulty level.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="static-label" for="category">Category</label>
+          <select name="category_id" id="category" required>
+            <option value="">Select a category...</option>
+            <% categories.forEach(function(cat) { %>
+              <option value="<%= cat.id %>" data-slug="<%= cat.slug %>" <%= (typeof old !== 'undefined' && old.category_id == cat.id) ? 'selected' : '' %>><%= cat.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <input type="number" name="prep_time" id="prepTime" placeholder=" " min="0" value="<%= typeof old !== 'undefined' ? old.prep_time || '' : '' %>" required>
+            <label for="prepTime">Prep (min)</label>
+          </div>
+          <div class="form-group">
+            <input type="number" name="cook_time" id="cookTime" placeholder=" " min="0" value="<%= typeof old !== 'undefined' ? old.cook_time || '' : '' %>" required>
+            <label for="cookTime">Cook (min)</label>
+          </div>
+          <div class="form-group">
+            <input type="number" name="servings" id="servings" placeholder=" " min="1" value="<%= typeof old !== 'undefined' ? old.servings || '' : '' %>" required>
+            <label for="servings">Servings</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="static-label">Difficulty</label>
+          <div class="radio-pills">
+            <input type="radio" name="difficulty" id="diffEasy" value="Easy" checked>
+            <label for="diffEasy">Easy</label>
+            <input type="radio" name="difficulty" id="diffMedium" value="Medium">
+            <label for="diffMedium">Medium</label>
+            <input type="radio" name="difficulty" id="diffAdvanced" value="Advanced">
+            <label for="diffAdvanced">Advanced</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Ingredients -->
+      <div class="create-card">
+        <div class="create-card__header">
+          <h2 class="create-card__title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Ingredients
+          </h2>
+          <p class="create-card__desc">List each ingredient with precise measurements.</p>
+        </div>
+
+        <%
+          var oldIngredients = [];
+          if (typeof old !== 'undefined' && old.ingredients) {
+            oldIngredients = Array.isArray(old.ingredients) ? old.ingredients : [old.ingredients];
+          }
+        %>
+        <div class="dynamic-list" id="ingredientsList">
+          <% if (oldIngredients.length > 0) { %>
+            <% oldIngredients.forEach(function(ing) { %>
+              <div class="dynamic-list__item">
+                <input type="text" name="ingredients[]" placeholder="e.g. 2 cups all-purpose flour" value="<%= ing %>" required>
+                <button type="button" class="dynamic-list__remove" title="Remove">&times;</button>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="dynamic-list__item">
+              <input type="text" name="ingredients[]" placeholder="e.g. 2 cups all-purpose flour" required>
+              <button type="button" class="dynamic-list__remove" title="Remove">&times;</button>
+            </div>
+            <div class="dynamic-list__item">
+              <input type="text" name="ingredients[]" placeholder="e.g. 1 tsp vanilla extract">
+              <button type="button" class="dynamic-list__remove" title="Remove">&times;</button>
+            </div>
+            <div class="dynamic-list__item">
+              <input type="text" name="ingredients[]" placeholder="e.g. Pinch of sea salt">
+              <button type="button" class="dynamic-list__remove" title="Remove">&times;</button>
+            </div>
+          <% } %>
+        </div>
+        <button type="button" class="dynamic-list__add" id="addIngredient">+ Add Ingredient</button>
+      </div>
+
+      <!-- Card 5: Instructions -->
+      <div class="create-card">
+        <div class="create-card__header">
+          <h2 class="create-card__title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Instructions
+          </h2>
+          <p class="create-card__desc">Walk the reader through each step with care.</p>
+        </div>
+
+        <%
+          var oldInstructions = [];
+          if (typeof old !== 'undefined' && old.instructions) {
+            oldInstructions = Array.isArray(old.instructions) ? old.instructions : [old.instructions];
+          }
+        %>
+        <div class="dynamic-list" id="instructionsList">
+          <% if (oldInstructions.length > 0) { %>
+            <% oldInstructions.forEach(function(inst, idx) { %>
+              <div class="dynamic-list__item">
+                <span class="dynamic-list__step-num"><%= String(idx + 1).padStart(2, '0') %></span>
+                <textarea name="instructions[]" placeholder="Describe this step..." rows="2" required><%= inst %></textarea>
+                <button type="button" class="dynamic-list__remove" title="Remove">&times;</button>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <div class="dynamic-list__item">
+              <span class="dynamic-list__step-num">01</span>
+              <textarea name="instructions[]" placeholder="Describe this step..." rows="2" required></textarea>
+              <button type="button" class="dynamic-list__remove" title="Remove">&times;</button>
+            </div>
+            <div class="dynamic-list__item">
+              <span class="dynamic-list__step-num">02</span>
+              <textarea name="instructions[]" placeholder="Describe this step..." rows="2"></textarea>
+              <button type="button" class="dynamic-list__remove" title="Remove">&times;</button>
+            </div>
+          <% } %>
+        </div>
+        <button type="button" class="dynamic-list__add" id="addInstruction">+ Add Step</button>
+      </div>
+
+      <!-- Submit -->
+      <div class="create-page__submit">
+        <button type="submit" class="btn btn--primary btn--full btn--lg">Publish Recipe</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

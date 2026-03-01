@@ -1,0 +1,191 @@
+<!-- Chef Chat Backdrop -->
+<div class="chef-chat-backdrop" id="chefChatBackdrop"></div>
+
+<!-- Chef Chat Panel -->
+<div class="chef-chat" id="chefChatPanel" aria-label="Master Chef Guide">
+
+  <!-- Decorative floral side strips -->
+  <div class="chef-chat__decor chef-chat__decor--left" aria-hidden="true">
+    <svg viewBox="0 0 40 600" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <!-- Vine stem -->
+      <path d="M20 0 C20 40, 8 60, 16 100 C24 140, 10 160, 18 200 C26 240, 12 260, 20 300 C28 340, 14 360, 22 400 C30 440, 16 460, 20 500 C24 540, 18 560, 20 600" stroke="var(--color-sage)" stroke-width="1" fill="none" opacity="0.7"/>
+      <!-- Leaves and flowers scattered along vine -->
+      <ellipse cx="12" cy="50" rx="8" ry="4" transform="rotate(-30 12 50)" fill="var(--color-sage)" opacity="0.4"/>
+      <ellipse cx="26" cy="110" rx="7" ry="3.5" transform="rotate(25 26 110)" fill="var(--color-sage)" opacity="0.45"/>
+      <circle cx="14" cy="80" r="5" fill="var(--color-terracotta)" opacity="0.35"/>
+      <circle cx="14" cy="80" r="2.5" fill="var(--color-terracotta)" opacity="0.3"/>
+      <ellipse cx="10" cy="170" rx="8" ry="4" transform="rotate(-20 10 170)" fill="var(--color-sage)" opacity="0.4"/>
+      <circle cx="24" cy="150" r="6" fill="var(--color-gold)" opacity="0.3"/>
+      <circle cx="24" cy="150" r="3" fill="var(--color-gold)" opacity="0.25"/>
+      <!-- 5-petal flower -->
+      <g transform="translate(16, 220)" opacity="0.45">
+        <circle cx="0" cy="-6" r="3.5" fill="var(--color-terracotta)"/>
+        <circle cx="5.7" cy="-1.8" r="3.5" fill="var(--color-terracotta)"/>
+        <circle cx="3.5" cy="4.8" r="3.5" fill="var(--color-terracotta)"/>
+        <circle cx="-3.5" cy="4.8" r="3.5" fill="var(--color-terracotta)"/>
+        <circle cx="-5.7" cy="-1.8" r="3.5" fill="var(--color-terracotta)"/>
+        <circle cx="0" cy="0" r="2.5" fill="var(--color-gold)"/>
+      </g>
+      <ellipse cx="8" cy="270" rx="7" ry="3.5" transform="rotate(-35 8 270)" fill="var(--color-sage)" opacity="0.4"/>
+      <ellipse cx="24" cy="310" rx="8" ry="4" transform="rotate(20 24 310)" fill="var(--color-sage)" opacity="0.45"/>
+      <circle cx="12" cy="340" r="4.5" fill="var(--color-terracotta)" opacity="0.3"/>
+      <!-- Small bud -->
+      <g transform="translate(20, 380)" opacity="0.4">
+        <ellipse cx="0" cy="-4" rx="3" ry="5" fill="var(--color-terracotta)"/>
+        <ellipse cx="-3" cy="0" rx="2.5" ry="5" transform="rotate(30 -3 0)" fill="var(--color-sage)"/>
+        <ellipse cx="3" cy="0" rx="2.5" ry="5" transform="rotate(-30 3 0)" fill="var(--color-sage)"/>
+      </g>
+      <ellipse cx="14" cy="430" rx="7" ry="3.5" transform="rotate(-25 14 430)" fill="var(--color-sage)" opacity="0.4"/>
+      <!-- Another flower -->
+      <g transform="translate(14, 490)" opacity="0.4">
+        <circle cx="0" cy="-5" r="3" fill="var(--color-gold)"/>
+        <circle cx="4.7" cy="-1.5" r="3" fill="var(--color-gold)"/>
+        <circle cx="2.9" cy="4" r="3" fill="var(--color-gold)"/>
+        <circle cx="-2.9" cy="4" r="3" fill="var(--color-gold)"/>
+        <circle cx="-4.7" cy="-1.5" r="3" fill="var(--color-gold)"/>
+        <circle cx="0" cy="0" r="2" fill="var(--color-terracotta)"/>
+      </g>
+      <ellipse cx="10" cy="540" rx="8" ry="4" transform="rotate(-15 10 540)" fill="var(--color-sage)" opacity="0.35"/>
+      <ellipse cx="26" cy="570" rx="7" ry="3.5" transform="rotate(30 26 570)" fill="var(--color-sage)" opacity="0.4"/>
+    </svg>
+  </div>
+  <div class="chef-chat__decor chef-chat__decor--right" aria-hidden="true">
+    <svg viewBox="0 0 40 600" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+      <!-- Vine stem -->
+      <path d="M20 0 C20 40, 32 60, 24 100 C16 140, 30 160, 22 200 C14 240, 28 260, 20 300 C12 340, 26 360, 18 400 C10 440, 24 460, 20 500 C16 540, 22 560, 20 600" stroke="var(--color-sage)" stroke-width="1" fill="none" opacity="0.7"/>
+      <!-- Leaves and flowers mirrored -->
+      <ellipse cx="28" cy="50" rx="8" ry="4" transform="rotate(30 28 50)" fill="var(--color-sage)" opacity="0.4"/>
+      <ellipse cx="14" cy="110" rx="7" ry="3.5" transform="rotate(-25 14 110)" fill="var(--color-sage)" opacity="0.45"/>
+      <circle cx="26" cy="80" r="5" fill="var(--color-terracotta)" opacity="0.35"/>
+      <circle cx="26" cy="80" r="2.5" fill="var(--color-terracotta)" opacity="0.3"/>
+      <ellipse cx="30" cy="170" rx="8" ry="4" transform="rotate(20 30 170)" fill="var(--color-sage)" opacity="0.4"/>
+      <circle cx="16" cy="150" r="6" fill="var(--color-gold)" opacity="0.3"/>
+      <circle cx="16" cy="150" r="3" fill="var(--color-gold)" opacity="0.25"/>
+      <!-- 5-petal flower -->
+      <g transform="translate(24, 220)" opacity="0.45">
+        <circle cx="0" cy="-6" r="3.5" fill="var(--color-terracotta)"/>
+        <circle cx="5.7" cy="-1.8" r="3.5" fill="var(--color-terracotta)"/>
+        <circle cx="3.5" cy="4.8" r="3.5" fill="var(--color-terracotta)"/>
+        <circle cx="-3.5" cy="4.8" r="3.5" fill="var(--color-terracotta)"/>
+        <circle cx="-5.7" cy="-1.8" r="3.5" fill="var(--color-terracotta)"/>
+        <circle cx="0" cy="0" r="2.5" fill="var(--color-gold)"/>
+      </g>
+      <ellipse cx="32" cy="270" rx="7" ry="3.5" transform="rotate(35 32 270)" fill="var(--color-sage)" opacity="0.4"/>
+      <ellipse cx="16" cy="310" rx="8" ry="4" transform="rotate(-20 16 310)" fill="var(--color-sage)" opacity="0.45"/>
+      <circle cx="28" cy="340" r="4.5" fill="var(--color-terracotta)" opacity="0.3"/>
+      <!-- Small bud -->
+      <g transform="translate(20, 380)" opacity="0.4">
+        <ellipse cx="0" cy="-4" rx="3" ry="5" fill="var(--color-terracotta)"/>
+        <ellipse cx="-3" cy="0" rx="2.5" ry="5" transform="rotate(30 -3 0)" fill="var(--color-sage)"/>
+        <ellipse cx="3" cy="0" rx="2.5" ry="5" transform="rotate(-30 3 0)" fill="var(--color-sage)"/>
+      </g>
+      <ellipse cx="26" cy="430" rx="7" ry="3.5" transform="rotate(25 26 430)" fill="var(--color-sage)" opacity="0.4"/>
+      <!-- Another flower -->
+      <g transform="translate(26, 490)" opacity="0.4">
+        <circle cx="0" cy="-5" r="3" fill="var(--color-gold)"/>
+        <circle cx="4.7" cy="-1.5" r="3" fill="var(--color-gold)"/>
+        <circle cx="2.9" cy="4" r="3" fill="var(--color-gold)"/>
+        <circle cx="-2.9" cy="4" r="3" fill="var(--color-gold)"/>
+        <circle cx="-4.7" cy="-1.5" r="3" fill="var(--color-gold)"/>
+        <circle cx="0" cy="0" r="2" fill="var(--color-terracotta)"/>
+      </g>
+      <ellipse cx="30" cy="540" rx="8" ry="4" transform="rotate(15 30 540)" fill="var(--color-sage)" opacity="0.35"/>
+      <ellipse cx="14" cy="570" rx="7" ry="3.5" transform="rotate(-30 14 570)" fill="var(--color-sage)" opacity="0.4"/>
+    </svg>
+  </div>
+
+  <!-- Header -->
+  <div class="chef-chat__header">
+    <div class="chef-chat__avatar">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" width="48" height="48">
+        <circle cx="24" cy="24" r="24" fill="rgba(255,255,255,0.2)"/>
+        <ellipse cx="24" cy="16" rx="10" ry="8" stroke="white" stroke-width="1.5" fill="rgba(255,255,255,0.1)"/>
+        <circle cx="18" cy="14" r="4" stroke="white" stroke-width="1.5" fill="rgba(255,255,255,0.08)"/>
+        <circle cx="30" cy="14" r="4" stroke="white" stroke-width="1.5" fill="rgba(255,255,255,0.08)"/>
+        <circle cx="24" cy="10" r="4" stroke="white" stroke-width="1.5" fill="rgba(255,255,255,0.08)"/>
+        <rect x="14" y="22" width="20" height="6" rx="2" stroke="white" stroke-width="1.5" fill="rgba(255,255,255,0.1)"/>
+        <circle cx="20" cy="35" r="1.5" fill="white" opacity="0.6"/>
+        <circle cx="24" cy="35" r="1.5" fill="white" opacity="0.6"/>
+        <circle cx="28" cy="35" r="1.5" fill="white" opacity="0.6"/>
+        <path d="M16 28v6a4 4 0 0 0 4 4h8a4 4 0 0 0 4-4v-6" stroke="white" stroke-width="1.5" fill="rgba(255,255,255,0.05)"/>
+      </svg>
+    </div>
+    <div class="chef-chat__header-info">
+      <h3 class="chef-chat__name">Master Chef</h3>
+      <span class="chef-chat__status">Your culinary guide</span>
+    </div>
+    <div class="chef-chat__header-actions">
+      <button class="chef-chat__reset" id="chefChatReset" aria-label="New conversation" title="New conversation">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      </button>
+      <button class="chef-chat__close" id="chefChatClose" aria-label="Close chat">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages Area -->
+  <div class="chef-chat__messages" id="chefChatMessages">
+    <div class="chef-chat__message chef-chat__message--bot">
+      <div class="chef-chat__msg-avatar">
+        <svg viewBox="0 0 32 32" width="32" height="32" fill="none">
+          <circle cx="16" cy="16" r="16" fill="#C67D5B"/>
+          <ellipse cx="16" cy="11" rx="7" ry="5.5" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.1)"/>
+          <circle cx="12" cy="10" r="2.8" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.08)"/>
+          <circle cx="20" cy="10" r="2.8" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.08)"/>
+          <circle cx="16" cy="7.5" r="2.8" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.08)"/>
+          <rect x="9.5" y="15" width="13" height="4" rx="1.5" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.1)"/>
+          <path d="M11 19v3.5a2.5 2.5 0 0 0 2.5 2.5h5a2.5 2.5 0 0 0 2.5-2.5V19" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.05)"/>
+        </svg>
+      </div>
+      <div class="chef-chat__msg-body">
+        <p>Welcome to the Aurae kitchen! I'm your Master Chef guide. Ask me anything about cooking — recipes, techniques, substitutions, or meal ideas. I can even show you what dishes look like. What shall we create today?</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Typing Indicator -->
+  <div class="chef-chat__typing" id="chefChatTyping">
+    <div class="chef-chat__msg-avatar">
+      <svg viewBox="0 0 32 32" width="32" height="32" fill="none">
+        <circle cx="16" cy="16" r="16" fill="#C67D5B"/>
+        <ellipse cx="16" cy="11" rx="7" ry="5.5" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.1)"/>
+        <circle cx="12" cy="10" r="2.8" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.08)"/>
+        <circle cx="20" cy="10" r="2.8" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.08)"/>
+        <circle cx="16" cy="7.5" r="2.8" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.08)"/>
+        <rect x="9.5" y="15" width="13" height="4" rx="1.5" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.1)"/>
+        <path d="M11 19v3.5a2.5 2.5 0 0 0 2.5 2.5h5a2.5 2.5 0 0 0 2.5-2.5V19" stroke="white" stroke-width="1.2" fill="rgba(255,255,255,0.05)"/>
+      </svg>
+    </div>
+    <div class="chef-chat__typing-dots">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Suggestion Chips -->
+  <div class="chef-chat__suggestions" id="chefChatSuggestions">
+    <button class="chef-chat__chip">What's a quick weeknight dinner?</button>
+    <button class="chef-chat__chip">How do I make pasta from scratch?</button>
+    <button class="chef-chat__chip">Show me a beautiful tiramisu</button>
+  </div>
+
+  <!-- Input Area -->
+  <div class="chef-chat__input-area">
+    <textarea class="chef-chat__input" id="chefChatInput" placeholder="Ask the Master Chef..." rows="1"></textarea>
+    <button class="chef-chat__send" id="chefChatSend" aria-label="Send message" disabled>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Floating Action Button -->
+<button class="chef-chat-fab" id="chefChatFab" aria-label="Open Master Chef Guide">
+  <svg class="chef-chat-fab__icon" width="26" height="26" viewBox="0 0 32 32" fill="none">
+    <ellipse cx="16" cy="11" rx="8" ry="6" stroke="currentColor" stroke-width="1.8" fill="none"/>
+    <circle cx="11" cy="10" r="3.2" stroke="currentColor" stroke-width="1.8" fill="none"/>
+    <circle cx="21" cy="10" r="3.2" stroke="currentColor" stroke-width="1.8" fill="none"/>
+    <circle cx="16" cy="7" r="3.2" stroke="currentColor" stroke-width="1.8" fill="none"/>
+    <rect x="9" y="16" width="14" height="5" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/>
+  </svg>
+  <svg class="chef-chat-fab__close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+</button>

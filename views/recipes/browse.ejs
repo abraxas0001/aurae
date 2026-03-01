@@ -1,0 +1,74 @@
+<%- include('../partials/head', { title: 'Recipes | Aurae' }) %>
+<%- include('../partials/header') %>
+
+<main>
+  <section class="browse-header">
+    <div class="container">
+      <span class="section-label">Our Collection</span>
+      <h1><%= activeCategory ? activeCategory : 'All Recipes' %></h1>
+
+      <!-- Search -->
+      <form class="search-bar" action="/recipes" method="GET">
+        <% if (category) { %><input type="hidden" name="category" value="<%= category %>"><% } %>
+        <svg class="search-bar__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" name="search" placeholder="Search recipes..." value="<%= search || '' %>" autocomplete="off">
+      </form>
+    </div>
+  </section>
+
+  <section class="container">
+    <!-- Filter bar -->
+    <div class="filter-bar" data-animate>
+      <a href="/recipes" class="filter-pill <%= !category ? 'active' : '' %>">All</a>
+      <% categories.forEach(function(cat) { %>
+        <a href="/recipes?category=<%= cat.slug %>" class="filter-pill <%= category === cat.slug ? 'active' : '' %>">
+          <%= cat.name %>
+        </a>
+      <% }) %>
+    </div>
+
+    <!-- Recipe Grid -->
+    <% if (recipes.length > 0) { %>
+      <div class="recipe-grid" data-animate-stagger>
+        <% recipes.forEach(function(recipe) { %>
+          <%- include('../partials/recipe-card', { recipe }) %>
+        <% }) %>
+      </div>
+
+      <!-- Pagination -->
+      <% if (totalPages > 1) { %>
+        <div class="pagination" data-animate>
+          <% if (currentPage > 1) { %>
+            <a href="/recipes?page=<%= currentPage - 1 %><%= category ? '&category=' + category : '' %><%= search ? '&search=' + search : '' %>">&larr; Prev</a>
+          <% } else { %>
+            <span class="disabled">&larr; Prev</span>
+          <% } %>
+
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <% if (i === currentPage) { %>
+              <span class="active"><%= i %></span>
+            <% } else { %>
+              <a href="/recipes?page=<%= i %><%= category ? '&category=' + category : '' %><%= search ? '&search=' + search : '' %>"><%= i %></a>
+            <% } %>
+          <% } %>
+
+          <% if (currentPage < totalPages) { %>
+            <a href="/recipes?page=<%= currentPage + 1 %><%= category ? '&category=' + category : '' %><%= search ? '&search=' + search : '' %>">Next &rarr;</a>
+          <% } else { %>
+            <span class="disabled">Next &rarr;</span>
+          <% } %>
+        </div>
+      <% } %>
+
+    <% } else { %>
+      <div class="empty-state" data-animate>
+        <img src="/svg/botanical-2.svg" alt="">
+        <h3>No recipes found</h3>
+        <p>Perhaps the next great dish is yours to create.</p>
+        <a href="/recipes/create" class="btn btn--primary">Create a Recipe</a>
+      </div>
+    <% } %>
+  </section>
+</main>
+
+<%- include('../partials/footer') %>

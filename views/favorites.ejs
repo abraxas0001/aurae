@@ -1,0 +1,28 @@
+<%- include('partials/head', { title: 'Your Collection | Aurae' }) %>
+<%- include('partials/header') %>
+
+<main class="favorites-page">
+  <div class="container">
+    <div class="section-heading" data-animate>
+      <span class="section-label">Personal</span>
+      <h1>Your Collection</h1>
+    </div>
+
+    <% if (recipes && recipes.length > 0) { %>
+      <div class="recipe-grid" data-animate-stagger>
+        <% recipes.forEach(function(recipe) { %>
+          <%- include('partials/recipe-card', { recipe }) %>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="empty-state" data-animate>
+        <img src="/svg/botanical-1.svg" alt="">
+        <h3>Your collection is empty</h3>
+        <p>Browse recipes and save the ones that inspire you.</p>
+        <a href="/recipes" class="btn btn--primary">Browse Recipes</a>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/footer') %>

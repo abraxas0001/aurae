@@ -1,0 +1,92 @@
+<%- include('partials/head', { title: 'Aurae | A Culinary Journal' }) %>
+<%- include('partials/header') %>
+
+<main>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero__background">
+      <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=80" alt="Culinary spread">
+    </div>
+    <div class="hero__overlay"></div>
+    <div class="hero__content">
+      <h1 class="hero__title">Aurae</h1>
+      <p class="hero__subtitle">Where Every Recipe Tells a Story</p>
+      <div class="hero__cta">
+        <a href="/recipes" class="btn btn--ghost btn--lg">Explore Recipes</a>
+      </div>
+    </div>
+    <div class="hero__scroll-indicator">
+      <span></span>
+    </div>
+  </section>
+
+  <!-- Editorial Intro -->
+  <section class="container">
+    <div class="editorial-intro">
+      <div class="editorial-intro__text" data-animate="fade-left">
+        <span class="section-label">Our Philosophy</span>
+        <p class="editorial-intro__quote">
+          Cooking is not about perfection. It is about presence, the slow stirring, the careful seasoning, the quiet pride of a meal made with your own hands.
+        </p>
+        <p class="editorial-intro__body">
+          Aurae is a collection of recipes for those who find meaning in the ritual of cooking. We believe the best meals are not the most elaborate, but the ones prepared with attention and shared with intention. Each recipe here has been written to be followed, yes, but also to be read because the story of a dish is part of its flavor.
+        </p>
+      </div>
+      <div class="editorial-intro__image" data-animate="fade-right">
+        <img src="/svg/botanical-1.svg" alt="">
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Recipes -->
+  <section class="container">
+    <div class="section-heading" data-animate>
+      <span class="section-label">From Our Kitchen</span>
+      <h2>Featured Recipes</h2>
+    </div>
+
+    <% if (featured && featured.length > 0) { %>
+      <div class="featured-grid" data-animate-stagger>
+        <% featured.forEach(function(recipe) { %>
+          <%- include('partials/recipe-card', { recipe }) %>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <div class="text-center mt-xl" data-animate>
+      <a href="/recipes" class="btn btn--outline">Browse All <%= recipeCount %> Recipes</a>
+    </div>
+  </section>
+
+  <!-- Category Showcase -->
+  <section class="container">
+    <div class="section-heading" data-animate>
+      <span class="section-label">Explore</span>
+      <h2>Browse by Course</h2>
+    </div>
+
+    <div class="category-grid" data-animate-stagger>
+      <% categories.forEach(function(cat) { %>
+        <a href="/recipes?category=<%= cat.slug %>" class="category-card">
+          <img src="<%= cat.image_url %>" alt="<%= cat.name %>" loading="lazy">
+          <div class="category-card__overlay">
+            <span class="category-card__name"><%= cat.name %></span>
+            <span class="category-card__count"><%= cat.recipe_count || 0 %> recipes</span>
+          </div>
+        </a>
+      <% }) %>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="cta-banner">
+    <div class="container" data-animate>
+      <h2>Begin Your Culinary Story</h2>
+      <p>Every great recipe starts with someone willing to share it.</p>
+      <a href="/recipes/create" class="btn">Create a Recipe</a>
+    </div>
+    <img src="/svg/botanical-1.svg" alt="" class="cta-banner__botanical" aria-hidden="true">
+  </section>
+</main>
+
+<%- include('partials/footer') %>

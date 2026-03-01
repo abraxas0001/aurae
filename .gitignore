@@ -1,0 +1,10 @@
+node_modules/
+.env
+.env.local
+.vercel
+database/*.db
+database/*.db-*
+*.db
+*.db-shm
+*.db-wal
+.DS_Store

@@ -1,0 +1,26 @@
+<header class="site-header" id="siteHeader">
+  <div class="header-inner">
+    <a href="/" class="logo">
+      <span class="logo-text">Aurae</span>
+      <span class="logo-tagline">A Culinary Journal</span>
+    </a>
+
+    <nav class="main-nav" id="mainNav">
+      <a href="/recipes" class="<%= currentPath === '/recipes' ? 'active' : '' %>">Recipes</a>
+      <a href="#" id="masterChefNavLink">Master Chef</a>
+      <% if (user) { %>
+        <a href="/favorites" class="<%= currentPath === '/favorites' ? 'active' : '' %>">Favorites</a>
+        <a href="/recipes/create" class="<%= currentPath === '/recipes/create' ? 'active' : '' %>">Create</a>
+        <a href="/auth/logout" class="nav-auth">Logout</a>
+      <% } else { %>
+        <a href="/auth/login" class="nav-auth">Sign In</a>
+      <% } %>
+    </nav>
+
+    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</header>

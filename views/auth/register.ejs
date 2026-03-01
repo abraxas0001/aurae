@@ -1,0 +1,51 @@
+<%- include('../partials/head', { title: 'Create Account | Aurae' }) %>
+
+<main class="auth-page">
+  <div class="form-card">
+    <a href="/" class="logo-text" style="font-family: var(--font-heading); font-size: 2rem; text-decoration: none;">Aurae</a>
+    <p class="text-center mb-lg" style="font-size: var(--text-sm); color: var(--color-espresso-light);">Join our culinary community</p>
+
+    <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <ul class="form-errors">
+        <% errors.forEach(function(err) { %>
+          <li><%= err %></li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <form action="/auth/register" method="POST">
+      <div class="form-group">
+        <input type="text" name="display_name" id="displayName" placeholder=" " value="<%= typeof old !== 'undefined' ? old.display_name || '' : '' %>" required>
+        <label for="displayName">Display Name</label>
+      </div>
+
+      <div class="form-group">
+        <input type="text" name="username" id="username" placeholder=" " value="<%= typeof old !== 'undefined' ? old.username || '' : '' %>" required>
+        <label for="username">Username</label>
+      </div>
+
+      <div class="form-group">
+        <input type="email" name="email" id="email" placeholder=" " value="<%= typeof old !== 'undefined' ? old.email || '' : '' %>" required>
+        <label for="email">Email</label>
+      </div>
+
+      <div class="form-group">
+        <input type="password" name="password" id="password" placeholder=" " required>
+        <label for="password">Password</label>
+      </div>
+
+      <div class="form-group">
+        <input type="password" name="password_confirm" id="passwordConfirm" placeholder=" " required>
+        <label for="passwordConfirm">Confirm Password</label>
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--full btn--lg">Create Account</button>
+    </form>
+
+    <p class="auth-link">
+      Already have an account? <a href="/auth/login">Sign in</a>
+    </p>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>
