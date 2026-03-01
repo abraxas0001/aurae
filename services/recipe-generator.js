@@ -1,5 +1,5 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const db = require('../database/db');
+const pool = require('../database/db');
 const { generateRecipeImage } = require('./gemini');
 
 const API_KEY = 'AIzaSyCjJTkC18-rLefSB2k23C99zoI5gONj5A8';
@@ -14,23 +14,33 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=600&q=80',
 ];
 
-function getOrCreateAIUser() {
-  let user = db.prepare('SELECT id FROM users WHERE email = ?').get('ai@aurae.internal');
-  if (!user) {
-    const result = db.prepare(
-      'INSERT INTO users (username, email, password_hash, display_name) VALUES (?, ?, ?, ?)'
-    ).run('aurae_ai', 'ai@aurae.internal', 'SYSTEM_NO_LOGIN', 'Aurae Kitchen');
-    user = { id: result.lastInsertRowid };
-    console.log('[Generator] Created AI system user (id=%d)', user.id);
+async function getOrCreateAIUser() {
+  if (!pool) throw new Error('Database not available');
+  
+  const userResult = await pool.query('SELECT id FROM users WHERE email = $1', ['ai@aurae.internal']);
+  
+  if (userResult.rows.length > 0) {
+    return userResult.rows[0];
   }
-  return user;
+  
+  const insertResult = await pool.query(
+    'INSERT INTO users (username, email, password_hash, display_name) VALUES ($1, $2, $3, $4) RETURNING id',
+    ['aurae_ai', 'ai@aurae.internal', 'SYSTEM_NO_LOGIN', 'Aurae Kitchen']
+  );
+  
+  console.log('[Generator] Created AI system user (id=%d)', insertResult.rows[0].id);
+  return insertResult.rows[0];
 }
 
-function getExistingCategories() {
-  return db.prepare('SELECT id, name, slug FROM categories ORDER BY name').all();
+async function getExistingCategories() {
+  if (!pool) return [];
+  const result = await pool.query('SELECT id, name, slug FROM categories ORDER BY name');
+  return result.rows;
 }
 
-function getOrCreateCategory(categoryData, existingCategories) {
+async function getOrCreateCategory(categoryData, existingCategories) {
+  if (!pool) throw new Error('Database not available');
+  
   if (categoryData.action === 'existing') {
     const match = existingCategories.find(
       c => c.name.toLowerCase() === categoryData.name.toLowerCase()
@@ -44,21 +54,21 @@ function getOrCreateCategory(categoryData, existingCategories) {
   const slug = categoryData.slug ||
     categoryData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-  const existing = db.prepare('SELECT id FROM categories WHERE slug = ? OR name = ?')
-    .get(slug, categoryData.name);
-  if (existing) return existing.id;
+  const existing = await pool.query('SELECT id FROM categories WHERE slug = $1 OR name = $2', [slug, categoryData.name]);
+  if (existing.rows.length > 0) return existing.rows[0].id;
 
-  const result = db.prepare(
-    'INSERT INTO categories (name, slug, description, image_url) VALUES (?, ?, ?, ?)'
-  ).run(
-    categoryData.name,
-    slug,
-    categoryData.description || `Recipes for ${categoryData.name.toLowerCase()}.`,
-    ''
+  const result = await pool.query(
+    'INSERT INTO categories (name, slug, description, image_url) VALUES ($1, $2, $3, $4) RETURNING id',
+    [
+      categoryData.name,
+      slug,
+      categoryData.description || `Recipes for ${categoryData.name.toLowerCase()}.`,
+      ''
+    ]
   );
 
   console.log('[Generator] Created new category: "%s"', categoryData.name);
-  return result.lastInsertRowid;
+  return result.rows[0].id;
 }
 
 function buildUniqueSlug(title) {
@@ -139,14 +149,16 @@ Rules:
 }
 
 async function generateAndSaveRecipe(authorId, recipeIndex) {
+  if (!pool) throw new Error('Database not available');
+  
   // Always fetch fresh categories (in case a new one was just created by recipe 1)
-  const existingCategories = getExistingCategories();
+  const existingCategories = await getExistingCategories();
 
   console.log('[Generator] Asking Gemini for recipe %d...', recipeIndex + 1);
   const data = await generateRecipeData(recipeIndex, existingCategories);
 
   // Resolve category
-  const categoryId = getOrCreateCategory(data.category, existingCategories);
+  const categoryId = await getOrCreateCategory(data.category, existingCategories);
 
   // Generate image (with fallback)
   let imageUrl = '';
@@ -161,12 +173,12 @@ async function generateAndSaveRecipe(authorId, recipeIndex) {
 
   const slug = buildUniqueSlug(data.title);
 
-  db.prepare(`
+  await pool.query(`
     INSERT INTO recipes
       (title, slug, description, image_url, prep_time, cook_time, servings,
        difficulty, category_id, author_id, ingredients, instructions)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+  `, [
     data.title,
     slug,
     data.description,
@@ -179,14 +191,19 @@ async function generateAndSaveRecipe(authorId, recipeIndex) {
     authorId,
     JSON.stringify(data.ingredients),
     JSON.stringify(data.instructions)
-  );
+  ]);
 
   console.log('[Generator] Published: "%s" (category_id=%d)', data.title, categoryId);
   return data.title;
 }
 
 async function generateDailyRecipes() {
-  const aiUser = getOrCreateAIUser();
+  if (!pool) {
+    console.log('[Generator] Database not available, skipping recipe generation');
+    return [];
+  }
+  
+  const aiUser = await getOrCreateAIUser();
   const titles = [];
 
   for (let i = 0; i < 2; i++) {
