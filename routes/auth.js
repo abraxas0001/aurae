@@ -53,21 +53,14 @@ router.post('/login', async (req, res) => {
       displayName: user.display_name
     };
 
-    console.log('[LOGIN] Session user set, regenerating session');
+    console.log('[LOGIN] Session user set:', req.session.user);
     
-    // Regenerate session to ensure it's properly saved
-    req.session.regenerate((err) => {
-      if (err) {
-        console.error('[LOGIN] Session regeneration error:', err);
+    // Save session before redirecting
+    req.session.save((saveErr) => {
+      if (saveErr) {
+        console.error('[LOGIN] Session save error:', saveErr);
       }
-      
-      req.session.user = {
-        id: user.id,
-        username: user.username,
-        displayName: user.display_name
-      };
-      
-      console.log('[LOGIN] Redirecting to:', redirect || '/');
+      console.log('[LOGIN] Session saved, redirecting to:', redirect || '/');
       res.redirect(redirect || '/');
     });
   } catch (err) {
@@ -133,18 +126,17 @@ router.post('/register', async (req, res) => {
       RETURNING id
     `, [username.trim(), email.trim(), passwordHash, display_name.trim()]);
 
-    // Regenerate session for new user
-    req.session.regenerate((err) => {
-      if (err) {
-        console.error('Session regeneration error:', err);
+    // Save session for new user
+    req.session.user = {
+      id: result.rows[0].id,
+      username: username.trim(),
+      displayName: display_name.trim()
+    };
+    
+    req.session.save((saveErr) => {
+      if (saveErr) {
+        console.error('Registration session save error:', saveErr);
       }
-      
-      req.session.user = {
-        id: result.rows[0].id,
-        username: username.trim(),
-        displayName: display_name.trim()
-      };
-      
       res.redirect('/');
     });
   } catch (err) {
