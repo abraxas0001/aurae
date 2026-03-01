@@ -273,7 +273,12 @@
 
   <!-- Author -->
   <div class="recipe-author">
-    <span>Recipe by <strong><%= recipe.author_name || 'The Aurae Kitchen' %></strong></span>
+    <% 
+      const authorName = recipe.author_name || 'The Aurae Kitchen';
+      const isAuraeKitchen = authorName === 'Aurae Kitchen' || authorName === 'The Aurae Kitchen';
+      const displayName = isAuraeKitchen ? authorName : `Chef ${authorName}`;
+    %>
+    <span>Recipe by <strong><%= displayName %></strong></span>
     <br>
     <span style="font-size: var(--text-xs); color: var(--color-sage);">
       <%= new Date(recipe.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
