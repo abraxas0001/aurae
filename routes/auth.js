@@ -19,11 +19,26 @@ router.post('/login', async (req, res) => {
   const { username, password } = req.body;
   const redirect = req.query.redirect || '/';
 
+  console.log('[LOGIN] Attempting login for:', username);
+
   try {
     const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
     const user = result.rows[0];
 
-    if (!user || !bcrypt.compareSync(password, user.password_hash)) {
+    if (!user) {
+      console.log('[LOGIN] User not found:', username);
+      return res.render('auth/login', {
+        title: 'Sign In | Aurae',
+        errors: ['Invalid username or password.'],
+        old: { username },
+        redirect
+      });
+    }
+
+    const passwordMatch = bcrypt.compareSync(password, user.password_hash);
+    console.log('[LOGIN] Password match:', passwordMatch);
+
+    if (!passwordMatch) {
       return res.render('auth/login', {
         title: 'Sign In | Aurae',
         errors: ['Invalid username or password.'],
@@ -38,17 +53,21 @@ router.post('/login', async (req, res) => {
       displayName: user.display_name
     };
 
-    // Ensure session is saved before redirecting
-    req.session.save((err) => {
+    console.log('[LOGIN] Session user set, regenerating session');
+    
+    // Regenerate session to ensure it's properly saved
+    req.session.regenerate((err) => {
       if (err) {
-        console.error('Session save error:', err);
-        return res.render('auth/login', {
-          title: 'Sign In | Aurae',
-          errors: ['Failed to save session. Please try again.'],
-          old: { username },
-          redirect
-        });
+        console.error('[LOGIN] Session regeneration error:', err);
       }
+      
+      req.session.user = {
+        id: user.id,
+        username: user.username,
+        displayName: user.display_name
+      };
+      
+      console.log('[LOGIN] Redirecting to:', redirect || '/');
       res.redirect(redirect || '/');
     });
   } catch (err) {
@@ -114,22 +133,18 @@ router.post('/register', async (req, res) => {
       RETURNING id
     `, [username.trim(), email.trim(), passwordHash, display_name.trim()]);
 
-    req.session.user = {
-      id: result.rows[0].id,
-      username: username.trim(),
-      displayName: display_name.trim()
-    };
-
-    // Ensure session is saved before redirecting
-    req.session.save((err) => {
+    // Regenerate session for new user
+    req.session.regenerate((err) => {
       if (err) {
-        console.error('Session save error:', err);
-        return res.render('auth/register', {
-          title: 'Create Account | Aurae',
-          errors: ['Failed to save session. Please try again.'],
-          old: { display_name, username, email }
-        });
+        console.error('Session regeneration error:', err);
       }
+      
+      req.session.user = {
+        id: result.rows[0].id,
+        username: username.trim(),
+        displayName: display_name.trim()
+      };
+      
       res.redirect('/');
     });
   } catch (err) {

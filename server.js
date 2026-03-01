@@ -25,6 +25,7 @@ const cookieConfig = {
   secret: process.env.SESSION_SECRET || 'aurae-culinary-journal-2024-default',
   resave: false,
   saveUninitialized: false,
+  rolling: true,
   cookie: { 
     maxAge: 7 * 24 * 60 * 60 * 1000,
     secure: process.env.NODE_ENV === 'production',

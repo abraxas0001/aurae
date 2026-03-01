@@ -3,6 +3,7 @@ const router = express.Router();
 const pool = require('../database/db');
 
 router.get('/', async (req, res) => {
+  console.log('[HOME] Session user:', req.session.user);
   try {
     // Featured recipes (3 most recent)
     const featuredResult = await pool.query(`
