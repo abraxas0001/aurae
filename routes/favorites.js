@@ -6,6 +6,9 @@ const { requireAuth } = require('../middleware/auth');
 // Favorites page
 router.get('/', requireAuth, async (req, res) => {
   try {
+    if (!pool) {
+      return res.status(503).send('Database not available');
+    }
     const result = await pool.query(`
       SELECT r.*, c.name as category_name
       FROM favorites f
@@ -28,6 +31,9 @@ router.get('/', requireAuth, async (req, res) => {
 // Toggle favorite (AJAX)
 router.post('/toggle', requireAuth, async (req, res) => {
   try {
+    if (!pool) {
+      return res.status(503).json({ error: 'Database not available' });
+    }
     const { recipeId } = req.body;
     const userId = req.session.user.id;
 
