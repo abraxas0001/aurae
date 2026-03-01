@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '.env.local' });
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
@@ -20,17 +20,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Sessions
-app.use(session({
-  store: new pgSession({
-    pool: pool,
-    tableName: 'session'
-  }),
-  secret: process.env.SESSION_SECRET || 'aurae-culinary-journal-2024',
+// Sessions - try to use pgSession if pool is available, fallback to memory store
+const cookieConfig = {
+  secret: process.env.SESSION_SECRET || 'aurae-culinary-journal-2024-default',
   resave: false,
   saveUninitialized: false,
   cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }
-}));
+};
+
+if (pool && process.env.DATABASE_URL) {
+  cookieConfig.store = new pgSession({
+    pool: pool,
+    tableName: 'session'
+  });
+}
+
+app.use(session(cookieConfig));
 
 // Make user and current path available to all templates
 app.use((req, res, next) => {
@@ -60,5 +65,7 @@ app.use((req, res) => {
 
 app.listen(PORT, () => {
   console.log(`\n  Aurae is running at http://localhost:${PORT}\n`);
-  initScheduler();
+  if (process.env.DATABASE_URL) {
+    initScheduler();
+  }
 });

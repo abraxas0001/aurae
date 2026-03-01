@@ -1,14 +1,21 @@
-require('dotenv').config({ path: '.env.local' });
+require('dotenv').config();
 const { Pool } = require('pg');
 
-// Create a pool of connections
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-});
+// Create a pool of connections only if DATABASE_URL is set
+let pool = null;
+if (process.env.DATABASE_URL) {
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  });
+}
 
 // Initialize database schema
 async function initializeDatabase() {
+  if (!pool) {
+    console.log('Database not configured - skipping schema initialization');
+    return;
+  }
   try {
     // Create extensions if needed
     await pool.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
@@ -75,6 +82,10 @@ async function initializeDatabase() {
 }
 
 // Initialize on startup
-initializeDatabase();
+if (process.env.DATABASE_URL) {
+  initializeDatabase();
+} else {
+  console.log('Warning: DATABASE_URL not set - database features will be unavailable');
+}
 
 module.exports = pool;
