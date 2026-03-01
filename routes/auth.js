@@ -54,13 +54,15 @@ router.post('/login', async (req, res) => {
     };
 
     console.log('[LOGIN] Session user set:', req.session.user);
+    console.log('[LOGIN] Session ID:', req.sessionID);
     
     // Save session before redirecting
     req.session.save((saveErr) => {
       if (saveErr) {
         console.error('[LOGIN] Session save error:', saveErr);
       }
-      console.log('[LOGIN] Session saved, redirecting to:', redirect || '/');
+      console.log('[LOGIN] Session saved, session ID:', req.sessionID);
+      console.log('[LOGIN] Redirecting to:', redirect || '/');
       res.redirect(redirect || '/');
     });
   } catch (err) {

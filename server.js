@@ -22,15 +22,17 @@ app.use(express.json());
 
 // Sessions - try to use pgSession if pool is available, fallback to memory store
 const cookieConfig = {
+  name: 'aurae.sid',
   secret: process.env.SESSION_SECRET || 'aurae-culinary-journal-2024-default',
   resave: false,
   saveUninitialized: false,
   rolling: true,
   cookie: { 
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     httpOnly: true,
-    sameSite: 'lax'
+    sameSite: 'lax',
+    path: '/'
   }
 };
 
@@ -38,7 +40,8 @@ if (pool && process.env.DATABASE_URL) {
   cookieConfig.store = new pgSession({
     pool: pool,
     tableName: 'session',
-    createTableIfMissing: false
+    createTableIfMissing: false,
+    pruneSessionInterval: false
   });
   console.log('Using PostgreSQL session store');
 } else {
@@ -46,6 +49,12 @@ if (pool && process.env.DATABASE_URL) {
 }
 
 app.use(session(cookieConfig));
+
+// Debug middleware to log session info
+app.use((req, res, next) => {
+  console.log('[DEBUG] Request to:', req.path, '| Session ID:', req.sessionID, '| Has user:', !!req.session.user);
+  next();
+});
 
 // Make user and current path available to all templates
 app.use((req, res, next) => {
