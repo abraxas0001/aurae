@@ -7,7 +7,11 @@ const { requireAuth } = require('../middleware/auth');
 router.get('/', requireAuth, async (req, res) => {
   try {
     if (!pool) {
-      return res.status(503).send('Database not available');
+      return res.render('favorites', {
+        title: 'Your Collection | Aurae',
+        recipes: [],
+        error: 'Database connection unavailable. Please try again later.'
+      });
     }
     const result = await pool.query(`
       SELECT r.*, c.name as category_name

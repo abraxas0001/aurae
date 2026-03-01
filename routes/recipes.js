@@ -85,7 +85,12 @@ router.get('/', async (req, res) => {
 router.get('/create', requireAuth, async (req, res) => {
   try {
     if (!pool) {
-      return res.status(503).send('Database not available');
+      return res.render('recipes/create', {
+        title: 'Share Your Recipe | Aurae',
+        categories: [],
+        errors: ['Database connection unavailable. Please try again later.'],
+        old: {}
+      });
     }
     const categoriesResult = await pool.query('SELECT * FROM categories ORDER BY name');
     const categories = categoriesResult.rows;
