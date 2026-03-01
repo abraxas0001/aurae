@@ -38,8 +38,15 @@ router.post('/toggle', requireAuth, async (req, res) => {
     if (!pool) {
       return res.status(503).json({ error: 'Database not available' });
     }
+    
     const { recipeId } = req.body;
-    const userId = req.session.user.id;
+    const userId = req.session?.user?.id;
+
+    console.log('Toggle favorite request:', { recipeId, userId, session: req.session });
+
+    if (!userId) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
 
     if (!recipeId) {
       return res.status(400).json({ error: 'Recipe ID is required.' });
@@ -55,8 +62,10 @@ router.post('/toggle', requireAuth, async (req, res) => {
       res.json({ favorited: true });
     }
   } catch (err) {
-    console.error('Toggle favorite error:', err);
-    res.status(500).json({error: 'Something went wrong' });
+    console.error('Toggle favorite error:', err.message);
+    console.error('Error stack:', err.stack);
+    console.error('Error details:', { userId: req.session?.user?.id, recipeId: req.body?.recipeId });
+    res.status(500).json({ error: 'Something went wrong', details: err.message });
   }
 });
 

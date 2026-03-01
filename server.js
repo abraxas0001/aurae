@@ -25,14 +25,23 @@ const cookieConfig = {
   secret: process.env.SESSION_SECRET || 'aurae-culinary-journal-2024-default',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }
+  cookie: { 
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax'
+  }
 };
 
 if (pool && process.env.DATABASE_URL) {
   cookieConfig.store = new pgSession({
     pool: pool,
-    tableName: 'session'
+    tableName: 'session',
+    createTableIfMissing: false
   });
+  console.log('Using PostgreSQL session store');
+} else {
+  console.log('Warning: Using memory session store - sessions will not persist across deployments');
 }
 
 app.use(session(cookieConfig));
