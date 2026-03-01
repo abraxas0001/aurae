@@ -6,7 +6,7 @@ const API_KEY = 'AIzaSyCjJTkC18-rLefSB2k23C99zoI5gONj5A8';
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 async function generateRecipeContent(title, category) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
   const prompt = `You are a world-class chef and culinary writer for a luxury food magazine called "Aurae".
 Given a recipe title and category, generate the FULL recipe content.

@@ -42,8 +42,13 @@ router.post('/chat', async (req, res) => {
 
     res.json({ reply, imageUrl });
   } catch (err) {
-    console.error('Chef chat error:', err.message);
-    res.status(500).json({ error: 'The Master Chef is taking a break. Please try again.' });
+    console.error('Chef chat error:', err);
+    console.error('Error stack:', err.stack);
+    console.error('Error details:', { message: err.message, name: err.name });
+    res.status(500).json({ 
+      error: 'The Master Chef is taking a break. Please try again.',
+      details: process.env.NODE_ENV === 'production' ? undefined : err.message 
+    });
   }
 });
 

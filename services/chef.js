@@ -30,23 +30,37 @@ Boundaries:
 - Never provide medical advice beyond general nutrition info`;
 
 async function chatWithChef(userMessage, conversationHistory = []) {
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-2.5-flash',
-    systemInstruction: SYSTEM_PROMPT
-  });
+  try {
+    if (!API_KEY || API_KEY === 'YOUR_API_KEY_HERE') {
+      throw new Error('Google AI API key not configured');
+    }
 
-  const chat = model.startChat({ history: conversationHistory });
-  const result = await chat.sendMessage(userMessage);
-  const reply = result.response.text();
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      systemInstruction: SYSTEM_PROMPT
+    });
 
-  // Detect image generation marker
-  const imageMatch = reply.match(/\[GENERATE_IMAGE:(.+?)\]/);
-  let imagePrompt = null;
-  if (imageMatch) {
-    imagePrompt = imageMatch[1].trim();
+    const chat = model.startChat({ history: conversationHistory });
+    const result = await chat.sendMessage(userMessage);
+    const reply = result.response.text();
+
+    // Detect image generation marker
+    const imageMatch = reply.match(/\[GENERATE_IMAGE:(.+?)\]/);
+    let imagePrompt = null;
+    if (imageMatch) {
+      imagePrompt = imageMatch[1].trim();
+    }
+
+    return { reply, imagePrompt };
+  } catch (error) {
+    console.error('chatWithChef error:', error.message);
+    console.error('Error details:', { 
+      message: error.message, 
+      status: error.status,
+      statusText: error.statusText 
+    });
+    throw error;
   }
-
-  return { reply, imagePrompt };
 }
 
 module.exports = { chatWithChef };

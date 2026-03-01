@@ -78,7 +78,7 @@ function buildUniqueSlug(title) {
 }
 
 async function generateRecipeData(recipeIndex, existingCategories) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
   const categoryList = existingCategories.map(c => `"${c.name}"`).join(', ');
   const date = new Date().toDateString();
