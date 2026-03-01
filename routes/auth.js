@@ -38,7 +38,19 @@ router.post('/login', async (req, res) => {
       displayName: user.display_name
     };
 
-    res.redirect(redirect || '/');
+    // Ensure session is saved before redirecting
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.render('auth/login', {
+          title: 'Sign In | Aurae',
+          errors: ['Failed to save session. Please try again.'],
+          old: { username },
+          redirect
+        });
+      }
+      res.redirect(redirect || '/');
+    });
   } catch (err) {
     console.error('Login error:', err);
     res.render('auth/login', {
@@ -108,7 +120,18 @@ router.post('/register', async (req, res) => {
       displayName: display_name.trim()
     };
 
-    res.redirect('/');
+    // Ensure session is saved before redirecting
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.render('auth/register', {
+          title: 'Create Account | Aurae',
+          errors: ['Failed to save session. Please try again.'],
+          old: { display_name, username, email }
+        });
+      }
+      res.redirect('/');
+    });
   } catch (err) {
     console.error('Registration error:', err);
     res.render('auth/register', {
