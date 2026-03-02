@@ -62,10 +62,9 @@ router.post('/toggle', requireAuth, async (req, res) => {
       res.json({ favorited: true });
     }
   } catch (err) {
+    // Never log full error stack - security precaution
     console.error('Toggle favorite error:', err.message);
-    console.error('Error stack:', err.stack);
-    console.error('Error details:', { userId: req.session?.user?.id, recipeId: req.body?.recipeId });
-    res.status(500).json({ error: 'Something went wrong', details: err.message });
+    res.status(500).json({ error: 'Something went wrong' });
   }
 });
 

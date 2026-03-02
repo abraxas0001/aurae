@@ -1,6 +1,4 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const fs = require('fs');
-const path = require('path');
 
 const API_KEY = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
@@ -46,43 +44,64 @@ Rules:
 }
 
 async function generateRecipeImage(title) {
-  const prompt = `Professional food photography of "${title}". Top-down shot on a rustic wooden table with natural soft lighting, styled like a luxury food magazine editorial. Warm tones, shallow depth of field, garnished beautifully. No text, no watermarks.`;
+  // Curated food photography from Unsplash based on dish type
+  const imageMap = {
+    // Breakfast & Brunch
+    'pancake': 'photo-1528207776546-365bb710ee93',
+    'waffle': 'photo-1562376552-0d160a2f238d',
+    'eggs': 'photo-1525351484163-7529414344d8',
+    'toast': 'photo-1525351484163-7529414344d8',
+    'omelette': 'photo-1546942113-a6c43b63104a',
+    
+    // Pasta & Italian
+    'pasta': 'photo-1621996346565-e3dbc646d9a9',
+    'spaghetti': 'photo-1621996346565-e3dbc646d9a9',
+    'ravioli': 'photo-1587748966451-c519e7e47345',
+    'lasagna': 'photo-1619895092538-128341789043',
+    'pizza': 'photo-1513104890138-7c749659a591',
+    
+    // Asian
+    'sushi': 'photo-1579584425555-c3ce17fd4351',
+    'ramen': 'photo-1569718212165-3a8278d5f624',
+    'curry': 'photo-1588166524941-3bf61a9c41db',
+    'stir fry': 'photo-1603133872878-684f208fb84b',
+    'pad thai': 'photo-1559314809-0d155014e29e',
+    
+    // Meat dishes
+    'steak': 'photo-1600891964092-4316c288032e',
+    'chicken': 'photo-1598103442097-8b74394b95c6',
+    'pork': 'photo-1529692236671-f1f6cf9683ba',
+    'beef': 'photo-1588168333986-5078d3ae3976',
+    
+    // Salads & Vegetarian
+    'salad': 'photo-1512621776951-a57141f2eefd',
+    'bowl': 'photo-1546069901-ba9599a7e63c',
+    'vegetable': 'photo-1540420773420-3366772f4999',
+    
+    // Desserts
+    'cake': 'photo-1578985545062-69928b1d9587',
+    'cookie': 'photo-1499636136210-6f4ee915583e',
+    'brownie': 'photo-1607920591413-4ec007e70023',
+    'ice cream': 'photo-1563805042-7684c019e1cb',
+    'pie': 'photo-1464349095431-e9a21285b5f3',
+    
+    // Default
+    'default': 'photo-1504674900247-0877df9cc836'
+  };
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-fast-generate-001:predict?key=${API_KEY}`;
+  // Find matching image based on title keywords
+  const titleLower = title.toLowerCase();
+  let imageId = imageMap.default;
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      instances: [{ prompt }],
-      parameters: { sampleCount: 1, aspectRatio: '4:3' }
-    })
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Imagen API error ${response.status}: ${errText}`);
+  for (const [keyword, id] of Object.entries(imageMap)) {
+    if (titleLower.includes(keyword)) {
+      imageId = id;
+      break;
+    }
   }
 
-  const data = await response.json();
-
-  if (!data.predictions || data.predictions.length === 0) {
-    throw new Error('No image generated');
-  }
-
-  const base64 = data.predictions[0].bytesBase64Encoded;
-  const mimeType = data.predictions[0].mimeType || 'image/png';
-  const ext = mimeType.includes('jpeg') ? 'jpg' : 'png';
-
-  // Save to public/uploads/
-  const filename = `ai-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const uploadsDir = path.join(__dirname, '..', 'public', 'uploads');
-  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
-  const filePath = path.join(uploadsDir, filename);
-  fs.writeFileSync(filePath, Buffer.from(base64, 'base64'));
-
-  return `/uploads/${filename}`;
+  // Return Unsplash URL with high quality
+  return `https://images.unsplash.com/${imageId}?w=1200&q=80&fit=crop`;
 }
 
 module.exports = { generateRecipeContent, generateRecipeImage };
