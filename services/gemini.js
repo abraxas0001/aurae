@@ -125,15 +125,50 @@ async function generateRecipeImage(title) {
 
 function buildStockPhotoUrl(title, seed) {
   const cleanedTitle = normalizeImageTitle(title);
-  const resolvedSeed = seed || buildImageSeed(cleanedTitle.toLowerCase());
-  const keywords = cleanedTitle
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean)
-    .slice(0, 3);
-  const tags = ['food', ...keywords].join(',');
+  const titleLower = cleanedTitle.toLowerCase();
 
-  return `https://loremflickr.com/1200/900/${tags}?lock=${resolvedSeed}`;
+  // Food-only fallback image ids to avoid unrelated random photos.
+  const keywordImageMap = {
+    mutton: 'photo-1544025162-d76694265947',
+    lamb: 'photo-1544025162-d76694265947',
+    goat: 'photo-1544025162-d76694265947',
+    chicken: 'photo-1598103442097-8b74394b95c6',
+    beef: 'photo-1558030006-450675393462',
+    steak: 'photo-1546833999-b9f581a1996d',
+    curry: 'photo-1585937421612-70a008356fbe',
+    biryani: 'photo-1563379091339-03246963d51a',
+    kebab: 'photo-1529193591184-b1d58069ecdd',
+    pasta: 'photo-1621996346565-e3dbc646d9a9',
+    pizza: 'photo-1513104890138-7c749659a591',
+    ramen: 'photo-1569718212165-3a8278d5f624',
+    sushi: 'photo-1579871494447-9811cf80d66c',
+    fish: 'photo-1519708227418-c8fd9a32b7a2',
+    salmon: 'photo-1467003909585-2f8a72700288',
+    salad: 'photo-1512621776951-a57141f2eefd',
+    dessert: 'photo-1488477181946-6428a0291777',
+    cake: 'photo-1578985545062-69928b1d9587',
+    lassi: 'photo-1604908554027-3ce3f4f5f7f2'
+  };
+
+  for (const [keyword, imageId] of Object.entries(keywordImageMap)) {
+    if (titleLower.includes(keyword)) {
+      return `https://images.unsplash.com/${imageId}?w=1200&q=80&fit=crop`;
+    }
+  }
+
+  const fallbackImageIds = [
+    'photo-1540189549336-e6e99c3679fe',
+    'photo-1504674900247-0877df9cc836',
+    'photo-1498837167922-ddd27525d352',
+    'photo-1521305916504-4a1121188589',
+    'photo-1546069901-ba9599a7e63c'
+  ];
+
+  const resolvedSeed = toSafeIntSeed(seed, titleLower);
+  const fallbackIndex = resolvedSeed % fallbackImageIds.length;
+  const fallbackId = fallbackImageIds[fallbackIndex];
+
+  return `https://images.unsplash.com/${fallbackId}?w=1200&q=80&fit=crop`;
 }
 
 async function generateNanoBananaImage(title, seed) {
