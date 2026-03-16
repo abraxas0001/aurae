@@ -240,12 +240,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const imagePreviewImg = document.getElementById('imagePreviewImg');
 
   if (imageUrlInput && imagePreviewImg) {
+    const loadPreviewImage = (url) => {
+      imagePreviewImg.classList.remove('loaded');
+      imagePreviewImg.onload = () => imagePreviewImg.classList.add('loaded');
+      imagePreviewImg.onerror = () => imagePreviewImg.classList.remove('loaded');
+      imagePreviewImg.src = url;
+
+      if (imagePreviewImg.complete && imagePreviewImg.naturalWidth > 0) {
+        imagePreviewImg.classList.add('loaded');
+      }
+    };
+
     const updatePreview = () => {
       const url = imageUrlInput.value.trim();
       if (url) {
-        imagePreviewImg.src = url;
-        imagePreviewImg.onload = () => imagePreviewImg.classList.add('loaded');
-        imagePreviewImg.onerror = () => imagePreviewImg.classList.remove('loaded');
+        loadPreviewImage(url);
       } else {
         imagePreviewImg.classList.remove('loaded');
         imagePreviewImg.src = '';
@@ -375,10 +384,18 @@ document.addEventListener('DOMContentLoaded', () => {
               const imagePreviewImg = document.getElementById('imagePreviewImg');
               if (imageUrlInput) imageUrlInput.value = imgData.imageUrl;
               if (imagePreviewImg) {
-                imagePreviewImg.src = imgData.imageUrl;
+                imagePreviewImg.classList.remove('loaded');
                 imagePreviewImg.onload = function() {
                   imagePreviewImg.classList.add('loaded');
                 };
+                imagePreviewImg.onerror = function() {
+                  imagePreviewImg.classList.remove('loaded');
+                };
+                imagePreviewImg.src = imgData.imageUrl;
+
+                if (imagePreviewImg.complete && imagePreviewImg.naturalWidth > 0) {
+                  imagePreviewImg.classList.add('loaded');
+                }
               }
             }
           }

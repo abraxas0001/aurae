@@ -52,8 +52,12 @@ function buildImageSeed(input) {
   return parseInt(hash.slice(0, 12), 16).toString();
 }
 
+function normalizeImageTitle(title) {
+  return String(title || '').replace(/\s+/g, ' ').trim();
+}
+
 function buildRecipeImagePrompt(title) {
-  const cleanedTitle = String(title || '').replace(/\s+/g, ' ').trim();
+  const cleanedTitle = normalizeImageTitle(title);
   return [
     'Editorial food photography of',
     cleanedTitle,
@@ -95,17 +99,30 @@ function buildSvgFallback(title) {
 }
 
 async function generateRecipeImage(title) {
-  const cleanedTitle = String(title || '').replace(/\s+/g, ' ').trim();
+  const cleanedTitle = normalizeImageTitle(title);
 
   if (!cleanedTitle) {
     return buildSvgFallback('Aurae recipe');
   }
 
-  const prompt = buildRecipeImagePrompt(cleanedTitle);
   const seed = buildImageSeed(cleanedTitle.toLowerCase());
-  const encodedPrompt = encodeURIComponent(prompt);
 
-  return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=900&model=flux&nologo=true&seed=${seed}`;
+  return `/ai/image?title=${encodeURIComponent(cleanedTitle)}&seed=${seed}`;
 }
 
-module.exports = { generateRecipeContent, generateRecipeImage };
+function buildUpstreamImageUrl(title, seed) {
+  const cleanedTitle = normalizeImageTitle(title);
+  const resolvedSeed = seed || buildImageSeed(cleanedTitle.toLowerCase());
+  const prompt = buildRecipeImagePrompt(cleanedTitle);
+  const encodedPrompt = encodeURIComponent(prompt);
+
+  return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=900&model=flux&nologo=true&seed=${resolvedSeed}`;
+}
+
+module.exports = {
+  buildSvgFallback,
+  buildUpstreamImageUrl,
+  generateRecipeContent,
+  generateRecipeImage,
+  normalizeImageTitle
+};
