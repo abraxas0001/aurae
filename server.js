@@ -8,12 +8,30 @@ const { initScheduler, runGeneration } = require('./services/scheduler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const CANONICAL_HOST = 'aurae-ruddy.vercel.app';
 
 // View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Static files
+app.use((req, res, next) => {
+  const forwardedHost = req.headers['x-forwarded-host'];
+  const hostHeader = forwardedHost || req.headers.host || '';
+  const host = hostHeader.split(',')[0].trim();
+
+  if (
+    process.env.NODE_ENV === 'production' &&
+    host &&
+    host.endsWith('.vercel.app') &&
+    host !== CANONICAL_HOST
+  ) {
+    return res.redirect(308, `https://${CANONICAL_HOST}${req.originalUrl}`);
+  }
+
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Body parsing
