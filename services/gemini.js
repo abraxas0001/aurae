@@ -1,7 +1,11 @@
+const crypto = require('crypto');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const API_KEY = process.env.GEMINI_API_KEY;
 const genAI = new GoogleGenerativeAI(API_KEY);
+
+// Debug: Log API key info (first 15 chars only for security)
+console.log('[Gemini] API Key loaded:', API_KEY ? `${API_KEY.substring(0, 15)}...` : 'MISSING');
 
 async function generateRecipeContent(title, category) {
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
@@ -43,65 +47,65 @@ Rules:
   return JSON.parse(text);
 }
 
+function buildImageSeed(input) {
+  const hash = crypto.createHash('sha256').update(input).digest('hex');
+  return parseInt(hash.slice(0, 12), 16).toString();
+}
+
+function buildRecipeImagePrompt(title) {
+  const cleanedTitle = String(title || '').replace(/\s+/g, ' ').trim();
+  return [
+    'Editorial food photography of',
+    cleanedTitle,
+    'served beautifully on a ceramic plate, natural window light, realistic textures, shallow depth of field, gourmet magazine styling, 3/4 camera angle, no text, no watermark'
+  ].join(' ');
+}
+
+function buildSvgFallback(title) {
+  const dishTitle = String(title || 'Aurae recipe').replace(/[&<>"']/g, (char) => {
+    const entities = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    };
+
+    return entities[char];
+  });
+
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900" role="img" aria-label="${dishTitle}">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#f5eadf"/>
+          <stop offset="100%" stop-color="#d7b89e"/>
+        </linearGradient>
+      </defs>
+      <rect width="1200" height="900" fill="url(#bg)"/>
+      <circle cx="600" cy="450" r="250" fill="#fff8f1" opacity="0.95"/>
+      <circle cx="600" cy="450" r="170" fill="#d98a5f" opacity="0.22"/>
+      <path d="M450 435c55-60 115-90 150-90 53 0 83 28 147 103" fill="none" stroke="#7a3e24" stroke-width="18" stroke-linecap="round"/>
+      <path d="M480 515c63 38 176 38 240 0" fill="none" stroke="#7a3e24" stroke-width="18" stroke-linecap="round"/>
+      <text x="600" y="760" text-anchor="middle" font-family="Georgia, serif" font-size="48" fill="#5c3a29">${dishTitle}</text>
+      <text x="600" y="815" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" letter-spacing="4" fill="#7a5a47">AURAE</text>
+    </svg>`;
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
 async function generateRecipeImage(title) {
-  // Curated food photography from Unsplash based on dish type
-  const imageMap = {
-    // Breakfast & Brunch
-    'pancake': 'photo-1528207776546-365bb710ee93',
-    'waffle': 'photo-1562376552-0d160a2f238d',
-    'eggs': 'photo-1525351484163-7529414344d8',
-    'toast': 'photo-1525351484163-7529414344d8',
-    'omelette': 'photo-1546942113-a6c43b63104a',
-    
-    // Pasta & Italian
-    'pasta': 'photo-1621996346565-e3dbc646d9a9',
-    'spaghetti': 'photo-1621996346565-e3dbc646d9a9',
-    'ravioli': 'photo-1587748966451-c519e7e47345',
-    'lasagna': 'photo-1619895092538-128341789043',
-    'pizza': 'photo-1513104890138-7c749659a591',
-    
-    // Asian
-    'sushi': 'photo-1579584425555-c3ce17fd4351',
-    'ramen': 'photo-1569718212165-3a8278d5f624',
-    'curry': 'photo-1588166524941-3bf61a9c41db',
-    'stir fry': 'photo-1603133872878-684f208fb84b',
-    'pad thai': 'photo-1559314809-0d155014e29e',
-    
-    // Meat dishes
-    'steak': 'photo-1600891964092-4316c288032e',
-    'chicken': 'photo-1598103442097-8b74394b95c6',
-    'pork': 'photo-1529692236671-f1f6cf9683ba',
-    'beef': 'photo-1588168333986-5078d3ae3976',
-    
-    // Salads & Vegetarian
-    'salad': 'photo-1512621776951-a57141f2eefd',
-    'bowl': 'photo-1546069901-ba9599a7e63c',
-    'vegetable': 'photo-1540420773420-3366772f4999',
-    
-    // Desserts
-    'cake': 'photo-1578985545062-69928b1d9587',
-    'cookie': 'photo-1499636136210-6f4ee915583e',
-    'brownie': 'photo-1607920591413-4ec007e70023',
-    'ice cream': 'photo-1563805042-7684c019e1cb',
-    'pie': 'photo-1464349095431-e9a21285b5f3',
-    
-    // Default
-    'default': 'photo-1504674900247-0877df9cc836'
-  };
+  const cleanedTitle = String(title || '').replace(/\s+/g, ' ').trim();
 
-  // Find matching image based on title keywords
-  const titleLower = title.toLowerCase();
-  let imageId = imageMap.default;
-
-  for (const [keyword, id] of Object.entries(imageMap)) {
-    if (titleLower.includes(keyword)) {
-      imageId = id;
-      break;
-    }
+  if (!cleanedTitle) {
+    return buildSvgFallback('Aurae recipe');
   }
 
-  // Return Unsplash URL with high quality
-  return `https://images.unsplash.com/${imageId}?w=1200&q=80&fit=crop`;
+  const prompt = buildRecipeImagePrompt(cleanedTitle);
+  const seed = buildImageSeed(cleanedTitle.toLowerCase());
+  const encodedPrompt = encodeURIComponent(prompt);
+
+  return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=900&model=flux&nologo=true&seed=${seed}`;
 }
 
 module.exports = { generateRecipeContent, generateRecipeImage };
