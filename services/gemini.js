@@ -52,6 +52,19 @@ function buildImageSeed(input) {
   return parseInt(hash.slice(0, 12), 16).toString();
 }
 
+function toSafeIntSeed(seedInput, fallbackTitle) {
+  const maxInt32 = 2147483646;
+  const baseSeed = seedInput || buildImageSeed(String(fallbackTitle || 'aurae-image'));
+  const numeric = Number.parseInt(String(baseSeed), 10);
+
+  if (!Number.isFinite(numeric) || Number.isNaN(numeric)) {
+    return 1337;
+  }
+
+  const normalized = Math.abs(numeric % maxInt32);
+  return normalized === 0 ? 1337 : normalized;
+}
+
 function normalizeImageTitle(title) {
   return String(title || '').replace(/\s+/g, ' ').trim();
 }
@@ -110,19 +123,81 @@ async function generateRecipeImage(title) {
   return `/ai/image?title=${encodeURIComponent(cleanedTitle)}&seed=${seed}`;
 }
 
-function buildUpstreamImageUrl(title, seed) {
+function buildStockPhotoUrl(title, seed) {
   const cleanedTitle = normalizeImageTitle(title);
   const resolvedSeed = seed || buildImageSeed(cleanedTitle.toLowerCase());
-  const prompt = buildRecipeImagePrompt(cleanedTitle);
-  const encodedPrompt = encodeURIComponent(prompt);
+  const keywords = cleanedTitle
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)
+    .slice(0, 3);
+  const tags = ['food', ...keywords].join(',');
 
-  return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1200&height=900&model=flux&nologo=true&seed=${resolvedSeed}`;
+  return `https://loremflickr.com/1200/900/${tags}?lock=${resolvedSeed}`;
+}
+
+async function generateNanoBananaImage(title, seed) {
+  const cleanedTitle = normalizeImageTitle(title);
+
+  if (!cleanedTitle) {
+    throw new Error('Image title is required for Nano Banana');
+  }
+
+  if (!API_KEY) {
+    throw new Error('GEMINI_API_KEY is missing');
+  }
+
+  const resolvedSeed = toSafeIntSeed(seed, cleanedTitle.toLowerCase());
+  const requestBody = {
+    contents: [
+      {
+        role: 'user',
+        parts: [
+          {
+            text: `${buildRecipeImagePrompt(cleanedTitle)}. Keep composition appetizing and realistic.`
+          }
+        ]
+      }
+    ],
+    generationConfig: {
+      responseModalities: ['IMAGE', 'TEXT'],
+      seed: resolvedSeed
+    }
+  };
+
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/nano-banana-pro-preview:generateContent?key=${API_KEY}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(requestBody)
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const errorMessage = payload?.error?.message || `Nano Banana failed with ${response.status}`;
+    throw new Error(errorMessage);
+  }
+
+  const parts = payload?.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find((part) => part.inlineData && part.inlineData.data);
+
+  if (!imagePart) {
+    throw new Error('Nano Banana returned no image payload');
+  }
+
+  return {
+    mimeType: imagePart.inlineData.mimeType || 'image/png',
+    data: imagePart.inlineData.data
+  };
 }
 
 module.exports = {
   buildSvgFallback,
-  buildUpstreamImageUrl,
+  buildStockPhotoUrl,
   generateRecipeContent,
+  generateNanoBananaImage,
   generateRecipeImage,
   normalizeImageTitle
 };

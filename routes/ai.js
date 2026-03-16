@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const {
   buildSvgFallback,
-  buildUpstreamImageUrl,
+  buildStockPhotoUrl,
   generateRecipeContent,
+  generateNanoBananaImage,
   generateRecipeImage,
   normalizeImageTitle
 } = require('../services/gemini');
@@ -48,30 +49,44 @@ router.get('/image', async (req, res) => {
   }
 
   const seed = String(req.query.seed || '').trim();
-  const upstreamUrl = buildUpstreamImageUrl(cleanedTitle, seed);
 
   try {
-    const upstreamResponse = await fetch(upstreamUrl, {
-      headers: {
-        Accept: 'image/*'
-      }
-    });
+    const nanoImage = await generateNanoBananaImage(cleanedTitle, seed);
+    const buffer = Buffer.from(nanoImage.data, 'base64');
 
-    if (!upstreamResponse.ok) {
-      throw new Error(`Upstream image request failed with ${upstreamResponse.status}`);
-    }
-
-    const contentType = upstreamResponse.headers.get('content-type') || 'image/jpeg';
-    const buffer = Buffer.from(await upstreamResponse.arrayBuffer());
-
-    res.set('Content-Type', contentType);
+    res.set('Content-Type', nanoImage.mimeType);
     res.set('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    res.set('x-aurae-image-source', 'nano-banana');
     return res.send(buffer);
   } catch (err) {
     console.error('AI image proxy error:', err.message);
-    res.set('Content-Type', 'image/svg+xml; charset=utf-8');
-    res.set('Cache-Control', 'public, max-age=300');
-    return res.send(decodeURIComponent(buildSvgFallback(cleanedTitle).split(',')[1]));
+
+    try {
+      const stockUrl = buildStockPhotoUrl(cleanedTitle, seed);
+      const stockResponse = await fetch(stockUrl, {
+        headers: {
+          Accept: 'image/*'
+        }
+      });
+
+      if (!stockResponse.ok) {
+        throw new Error(`Stock image request failed with ${stockResponse.status}`);
+      }
+
+      const contentType = stockResponse.headers.get('content-type') || 'image/jpeg';
+      const buffer = Buffer.from(await stockResponse.arrayBuffer());
+
+      res.set('Content-Type', contentType);
+      res.set('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+      res.set('x-aurae-image-source', 'stock-fallback');
+      return res.send(buffer);
+    } catch (stockErr) {
+      console.error('Stock image fallback failed:', stockErr.message);
+      res.set('Content-Type', 'image/svg+xml; charset=utf-8');
+      res.set('Cache-Control', 'public, max-age=300');
+      res.set('x-aurae-image-source', 'svg-fallback');
+      return res.send(decodeURIComponent(buildSvgFallback(cleanedTitle).split(',')[1]));
+    }
   }
 });
 
