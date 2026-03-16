@@ -7,6 +7,84 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 // Debug: Log API key info (first 15 chars only for security)
 console.log('[Gemini] API Key loaded:', API_KEY ? `${API_KEY.substring(0, 15)}...` : 'MISSING');
 
+function buildFallbackRecipeContent(title, category) {
+  const safeTitle = normalizeImageTitle(title) || 'Chef Special';
+  const safeCategory = normalizeImageTitle(category) || 'Dinner';
+
+  return {
+    description: `${safeTitle} is a comforting ${safeCategory.toLowerCase()} recipe with layered flavors and simple, reliable technique for home cooks. This fallback version is generated locally when AI content is temporarily unavailable.`,
+    prep_time: 20,
+    cook_time: 35,
+    servings: 4,
+    difficulty: 'Medium',
+    ingredients: [
+      `500g ${safeTitle.toLowerCase().includes('chicken') ? 'chicken' : 'main protein or vegetables'}, cut into bite-sized pieces`,
+      '2 tbsp neutral oil or ghee',
+      '1 large onion, finely sliced',
+      '2 tsp ginger-garlic paste',
+      '2 medium tomatoes, chopped',
+      '1 tsp ground cumin',
+      '1 tsp ground coriander',
+      '1/2 tsp turmeric',
+      '1/2 tsp chili powder (adjust to taste)',
+      'Salt, to taste',
+      'Fresh herbs for garnish'
+    ],
+    instructions: [
+      { step: 1, text: 'Heat oil in a heavy pan over medium heat. Add onion and cook until deeply golden and aromatic.' },
+      { step: 2, text: 'Stir in ginger-garlic paste and cook briefly, then add tomatoes and spices. Cook until the masala thickens and oil begins to separate.' },
+      { step: 3, text: 'Add the main ingredient and coat thoroughly in the masala. Cook for 3 to 4 minutes, stirring gently.' },
+      { step: 4, text: 'Pour in a splash of water, cover, and simmer until tender and well-seasoned. Adjust salt and spice to taste.' },
+      { step: 5, text: 'Finish with fresh herbs and rest for 2 minutes before serving. Pair with rice, flatbread, or a crisp salad.' }
+    ]
+  };
+}
+
+function extractRecipeJsonObject(rawText) {
+  if (!rawText) {
+    throw new Error('Empty AI response');
+  }
+
+  let cleaned = String(rawText).trim();
+
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  }
+
+  const directParse = (() => {
+    try {
+      return JSON.parse(cleaned);
+    } catch {
+      return null;
+    }
+  })();
+
+  if (directParse) {
+    return directParse;
+  }
+
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error('No JSON object found in AI response');
+  }
+
+  return JSON.parse(jsonMatch[0]);
+}
+
+function normalizeRecipeContent(data, title, category) {
+  const fallback = buildFallbackRecipeContent(title, category);
+
+  return {
+    description: typeof data?.description === 'string' && data.description.trim() ? data.description : fallback.description,
+    prep_time: Number.isFinite(Number(data?.prep_time)) ? Number(data.prep_time) : fallback.prep_time,
+    cook_time: Number.isFinite(Number(data?.cook_time)) ? Number(data.cook_time) : fallback.cook_time,
+    servings: Number.isFinite(Number(data?.servings)) ? Number(data.servings) : fallback.servings,
+    difficulty: ['Easy', 'Medium', 'Advanced'].includes(data?.difficulty) ? data.difficulty : fallback.difficulty,
+    ingredients: Array.isArray(data?.ingredients) && data.ingredients.length > 0 ? data.ingredients : fallback.ingredients,
+    instructions: Array.isArray(data?.instructions) && data.instructions.length > 0 ? data.instructions : fallback.instructions
+  };
+}
+
 async function generateRecipeContent(title, category) {
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
@@ -37,14 +115,15 @@ Rules:
 - 4-7 instruction steps, richly written
 - Return ONLY valid JSON`;
 
-  const result = await model.generateContent(prompt);
-  let text = result.response.text().trim();
-
-  if (text.startsWith('```')) {
-    text = text.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+  try {
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const parsed = extractRecipeJsonObject(text);
+    return normalizeRecipeContent(parsed, title, category);
+  } catch (err) {
+    console.error('Recipe content generation fallback:', err.message);
+    return buildFallbackRecipeContent(title, category);
   }
-
-  return JSON.parse(text);
 }
 
 function buildImageSeed(input) {
