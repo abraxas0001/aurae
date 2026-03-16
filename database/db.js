@@ -70,7 +70,7 @@ async function initializeDatabase() {
         sess json NOT NULL,
         expire timestamp(6) NOT NULL,
         PRIMARY KEY (sid)
-      ) WITH (OIDS=FALSE);
+      );
 
       CREATE INDEX IF NOT EXISTS IDX_session_expire ON session (expire);
     `);
